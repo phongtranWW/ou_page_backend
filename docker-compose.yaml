@@ -1,0 +1,41 @@
+services:
+  node:
+    image: node:22
+    container_name: ou_page_backend
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./node_modules:/app/node_modules
+      - ./.env:/app/.env
+      - ./package-lock.json:/app/package-lock.json
+      - ./tsconfig.build.json:/app/tsconfig.build.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./database:/var/private/database
+    ports:
+      - 3000:3000
+    command: ['npm', 'run', 'start:dev']
+    networks:
+      - ou_page_network
+    restart: 'no'
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: ou_page_storage
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - ./minio-data:/data
+    environment:
+      - MINIO_ROOT_USER=ou_admin
+      - MINIO_ROOT_PASSWORD=ou_admin_2025
+    networks:
+      - ou_page_network
+    command: ['server', '/data', '--console-address', ':9001']
+    restart: 'no'
+networks:
+  ou_page_network:
+    driver: bridge
+volumes:
+  ou_page_storage_data:
+    driver: local
